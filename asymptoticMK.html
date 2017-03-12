@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+<title>asymptoticMK: Asymptotic McDonald-Kreitman Test</title>
+<style type="text/css">
+	body, td { 
+		font:normal normal 100%/1.0 optima, times new roman, verdana, serif;
+		line-height: 130%;
+	}
+	.math {
+		font-family: times new roman, serif;
+	}
+	sub { vertical-align:baseline; position:relative; top:0.3em; line-height:0; }
+</style>
+</head>
+<body topmargin=50 leftmargin=50 rightmargin=50 bottommargin=50 bgcolor="#FFF9F0">
+
+<h2 style="margin-bottom:5px;">asymptoticMK: Asymptotic McDonald&ndash;Kreitman Test</h2>
+<p style="margin-top:5px;"><small>By Benjamin C. Haller & Philipp W. Messer.  Copyright &copy; 2017 Philipp Messer.</small></p>
+
+<p style="margin-top: 30px;">See below for background and usage information.  If you use this service, please cite our paper:</p>
+<blockquote><i>[not yet published, please check back for a citation...]</i></blockquote>
+
+<form target="_blank" action="http://benhaller.com/cgi-bin/R/asymptoticMK_run.html" enctype="multipart/form-data" method="post" autocomplete="off">
+
+<p style="margin-top: 30px;"><b>Submit your data:</b></p>
+
+<!-- This is an attempt to get password managers to stay out of our input fields, by providing them with dummy fields to mess with. -->
+<!-- See, e.g., http://stackoverflow.com/a/23234498/2752221 for discussion. Since the fields are hidden, should be harmless. -->
+<input type="text" style="display:none" name="username">
+<input type="password" style="display:none" name="password">
+
+<blockquote><table cellspacing=0 cellpadding=0 border=0>
+<tr><td height=25 valign="middle" class="math"><i>d</i></td><td>&nbsp;&nbsp;:&nbsp;&nbsp;</td><td><input type="text" autocomplete="off" name="d" size="15"></td></tr>
+<tr><td height=25 valign="middle" class="math"><i>d</i><sub><small>0</small></sub></td><td>&nbsp;&nbsp;:&nbsp;&nbsp;</td><td><input type="text" autocomplete="off" name="d0" size="15"></td></tr>
+<tr><td height=25 valign="middle">Input file</td><td>&nbsp;&nbsp;:&nbsp;&nbsp;</td><td><input type="file" name="datafile" size="40"></td></tr>
+<tr><td height=25 valign="middle" colspan=3><small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Tab-delimited with named columns for <span class="math"><i>x</i></span>, <span class="math"><i>p</i></span>, and <span class="math"><i>p</i><sub><small>0</small></sub></span>) <i>[<A HREF="./sample_polymorphism_levels.txt" target="_blank">sample</A>]</i></small></td></tr>
+<tr><td height=25 valign="middle"><span class="math"><i>x</i></span> interval to fit</td><td>&nbsp;&nbsp;:&nbsp;&nbsp;</td><td>[<input type="text" autocomplete="off" name="xlow" size="6" value="0.10">,<input type="text" autocomplete="off" name="xhigh" size="6" value="0.90">]</td></tr>
+<tr><td height=25 valign="middle"></td><td></td><td align="right"><input type="submit" value="Submit"></td></tr>
+</table>
+</blockquote>
+
+</form>
+
+<p style="margin-top: 30px;">Please let us know of any issues with this service at <i>philipp {dot} messer &lt;at&gt; gmail [dot] com</i>.  Thanks!</p>
+
+
+<hr width="75%" style="margin-top: 45px; margin-bottom: 45px;">
+
+
+<h3>Background & usage:</h3>
+
+<p>This page provides an R-based implementation of the asymptotic McDonald&ndash;Kreitman test (<A HREF="http://dx.doi.org/10.1073/pnas.1220835110" target="_blank">Messer & Petrov 2013</A>) as a web-based service (it can also be run at the command line using <tt>curl</tt>, or as a local R script; see below).  This test is used to determine an estimate of <span class="math"><i>&alpha;</i></span>&nbsp;(alpha), the fraction of substitutions in a genomic test region that were driven to fixation by positive selection.  To do this, it uses the data supplied to calculate empirical values of a function <span class="math"><i>&alpha;</i>(<i>x</i>)</span>:<p>
+
+<blockquote><span class="math"><i>&alpha;</i>(<i>x</i>) = 1 &minus; (<i>d</i><sub><small>0</small></sub> / <i>d</i>) (<i>p</i>(<i>x</i>) / <i>p</i><sub><small>0</small></sub>(<i>x</i>))</span></blockquote>
+
+<p>where</p>
+
+<blockquote><table cellspacing=0 cellpadding=0 border=0>
+<tr><td height=25 valign="middle" class="math"><i>x</i></td><td>&nbsp;&nbsp;=&nbsp;&nbsp;</td><td>derived allele frequency</td></tr>
+<tr><td height=25 valign="middle" class="math"><i>d</i><sub><small>0</small></sub></td><td>&nbsp;&nbsp;=&nbsp;&nbsp;</td><td>substitution rate in the neutral reference region</td></tr>
+<tr><td height=25 valign="middle" class="math"><i>d</i></td><td>&nbsp;&nbsp;=&nbsp;&nbsp;</td><td>substitution rate in the test region</td></tr>
+<tr><td height=25 valign="middle" class="math"><i>p</i><sub><small>0</small></sub>(<i>x</i>)</td><td>&nbsp;&nbsp;=&nbsp;&nbsp;</td><td>polymorphism level in the neutral reference region for frequency class <span class="math"><i>x</i></span></td></tr>
+<tr><td height=25 valign="middle" class="math"><i>p</i>(<i>x</i>)</td><td>&nbsp;&nbsp;=&nbsp;&nbsp;</td><td>polymorphism level in the test region for frequency class <span class="math"><i>x</i></span>.</td></tr></table>
+</blockquote>
+
+<p>It then fits an exponential function to this data, of the form:</p>
+
+<blockquote><span class="math"><i>&alpha;</i><sub><small>fit</small></sub>(<i>x</i>) = <i>a</i> + <i>b</i> exp(&minus;<i>cx</i>)</span></blockquote>
+
+<p>The value of this function extrapolated to <span class="math"><i>x</i>&nbsp;=&nbsp;1</span> provides an estimated value for <span class="math"><i>&alpha;</i></span>:</p>
+
+<blockquote><span class="math"><i>&alpha;</i><sub><small>asymptotic</small></sub> = <i>&alpha;</i><sub><small>fit</small></sub>(<i>x</i> = 1)</span></blockquote>
+
+<p>Although the exponential function is generally expected to provide the best fit, a linear function is also fit to the data, of the form:</p>
+
+<blockquote><span class="math"><i>&alpha;</i><sub><small>fit</small></sub>(<i>x</i>) = <i>a</i> + <i>bx</i></span></blockquote>
+
+<p>If the exponential fit fails to converge (which can happen if the data does not fit an exponential pattern), or if the linear fit is superior according to AIC, then the linear fit is reported; otherwise, the exponential fit is reported.  (There are also pathological cases in which the exponential fit is superior according to AIC, but the confidence interval of its estimate of <span class="math"><i>&alpha;</i></span> is very wide; in that case, the linear fit is also preferred.)</p>
+
+<p>The individual steps required to execute the test are:</p>
+
+<ol>
+<li>determine your test region and an appropriate neutral reference region,
+<li>determine the overall substitution rates for those regions,
+<li>subdivide your SNP data for these regions into derived allele frequency classes (the number of classes depending upon how much data you have, such that there are no "empty" frequency classes),
+<li>determine the polymorphism level within each of those frequency classes, and
+<li>submit this information using the form above to obtain plots and analysis.
+</ol>
+
+<p>Note that it is often advisable to trim the polymorphism data, removing the lowest and highest frequency classes.  This is recommended because low-frequency polymorphisms can have a high error rate due to sequencing error, whereas high-frequency polymorphisms can be vulnerable to polarization error.  This service therefore allows specification of the interval of <span class="math"><i>x</i></span> that will be used to fit the exponential and linear models.</p>
+
+<p>Values for the polymorphism rates should be supplied in a tab-separated file of row data, with columns for <span class="math"><i>x</i></span>, <span class="math"><i>p</i></span>, and <span class="math"><i>p</i><sub><small>0</small></sub></span>.  The file's first row should contain text labels for the columns; the specific text used to label the columns is unimportant, but their order (<span class="math"><i>x</i></span>, <span class="math"><i>p</i></span>, <span class="math"><i>p</i><sub><small>0</small></sub></span>) is important.  A sample file can be seen <A HREF="./sample_polymorphism_levels.txt" target="_blank">here</A>.</p>
+
+
+<hr width="75%" style="margin-top: 45px; margin-bottom: 45px;">
+
+
+<h3>Command-line usage</h3>
+
+<p>This service can also be used in an automated fashion at the command line using the Un*x command <tt>curl</tt>.  Depending upon your operating system, you may need to <A HREF="https://curl.haxx.se/download.html" target="_blank">install <tt>curl</tt></A> first.  To download the full HTML response for a query, use a command like:</p>
+
+<pre>curl -F"d=593" -F"d0=930" -F"xlow=0.1" -F"xhigh=0.9" -F"datafile=@polymorphisms.txt"
+     -o "MK_full.html" http://benhaller.com/cgi-bin/R/asymptoticMK_run.html</pre>
+
+<p>That should all be entered as a single line at the Un*x terminal prompt.  The values for <span class="math"><i>d</i></span>, <span class="math"><i>d</i><sub><small>0</small></sub></span>, and the <span class="math"><i>x</i></span> cutoff interval are supplied with <tt>-F</tt> options to the <tt>curl</tt> command as shown here.  The file to upload with binned values for <span class="math"><i>x</i></span>, <span class="math"><i>p</i></span>, and <span class="math"><i>p</i><sub><small>0</small></sub></span> is given with another <tt>-F</tt> option, with an <tt>@</tt> preceding the filename.  The filename for output is given with <tt>-o</tt>, and the URL for submission to this web service is supplied last.  In this example, the file to upload and the output file are both in the current directory, but supplying Un*x paths should also work.  The result of this command is an HTML file with the full response, including embedded plots.</p>
+
+<p>Often, however, for automation of a workflow one needs the results in a more machine-readable format, without plots, explanatory text, or HTML markup.  To get that, use a command like:</p>
+
+<pre>curl -F"d=593" -F"d0=930" -F"xlow=0.1" -F"xhigh=0.9" -F"datafile=@polymorphisms.txt"
+     -F"reply=table" -o "MK_table.txt" http://benhaller.com/cgi-bin/R/asymptoticMK_run.html</pre>
+
+<p>Here an extra option, <tt>reply=table</tt>, has been supplied with <tt>-F</tt> to request the results in the form of a tab-separated table of values, saved as <tt>MK_table.txt</tt> in the current directory (as requested by the <tt>-o</tt> option).  The resulting file will start with a header of comment lines, beginning with <tt>#</tt>, that specify the input values for the analysis.  The remainder of the file will be tab-separated rows, with a symbol name and then a value on each line.  Values will be given for the coefficients <span class="math"><i>a</i></span>, <span class="math"><i>b</i></span>, and <span class="math"><i>c</i></span> of the fit (with <tt>NA</tt> as the value of <span class="math"><i>c</i></span> if the linear fit was chosen), the asymptotic estimate <span class="math"><i>&alpha;</i><sub><small>asymptotic</small></sub></span> from the fitted function, the confidence interval around that estimate, and the original, non-asymptotic McDonald&ndash;Kreitman estimate <span class="math"><i>&alpha;</i><sub><small>original</small></sub></span> (for comparison to the asymptotic estimate).  Other Unix tools such as <tt>grep</tt> may then be used to extract the desired values from the response.</p>
+
+
+<hr width="75%" style="margin-top: 45px; margin-bottom: 45px;">
+
+
+<h3>Source & acknowledgements:</h3>
+
+<p>This service is open-source; the R code implementing it is in the <A HREF="https://github.com/MesserLab/asymptoticMK" target="_blank">asymptoticMK Github repository</A>.  An example <A HREF="
+https://messerlab.org/slim/" target="_blank">SLiM</A> model for producing binned polymorphism data suitable for testing this service is also available in that repository.  Finally, an R script suitable for local execution is also available there, if you prefer to run asymptoticMK locally rather than through this web interface.</p>
+
+<p>The asymptoticMK service was implemented using FastRWeb, a package for building R-based web services.  Thanks to S. Urbanek for FastRWeb, and for considerable help with getting this service up and running.  Thanks also to G. Grothendieck, J. Horner, and S. Urbanek for other R packages used in asymptoticMK.  Thanks to A.-N. Spiess for the R code used to obtain a confidence interval for the exponential fit.  Development of this service was supported by funds from the College of Agriculture and Life Sciences at Cornell University to PWM.</p>
+
+</body>

@@ -1,0 +1,109 @@
+//  simulate_alpha.slim
+//  asymptoticMK
+//
+//  Created by Ben Haller on 3/12/2017.
+//  Copyright (c) 2017 Philipp Messer.  All rights reserved.
+//  A product of the Messer Lab, http://messerlab.org/
+//
+
+//  This file is part of asymptoticMK.
+//
+//  asymptoticMK is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+//
+//  asymptoticMK is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License along with asymptoticMK.  If not, see <http://www.gnu.org/licenses/>.
+
+
+// This web service should be available at http://benhaller.com/messerlab/asymptoticMK.html
+// The Github repository for asymptoticMK is at https://github.com/MesserLab/asymptoticMK
+
+
+initialize() {
+	// These are the parameters we vary; the run length is varied by modifying the
+	// generations used for the events below.  The values here are the baseline.
+	defineConstant("mu", 1e-9);
+	defineConstant("L", 1e7);
+	defineConstant("r_b", 0.0005);
+	defineConstant("s_b", 0.1);
+	defineConstant("s_d", -0.02);
+	
+	initializeMutationRate(mu);
+	initializeMutationType("m1", 0.5, "f", 0.0);         // neutral
+	initializeMutationType("m2", 0.5, "g", s_d, 0.2);    // deleterious
+	initializeMutationType("m3", 0.5, "f", s_b);        // beneficial
+	
+	initializeGenomicElementType("g1", c(m1, m2, m3), c(0.5, 0.5, r_b));
+	initializeGenomicElement(g1, 0, L);
+	initializeRecombinationRate(1e-7);
+}
+
+1 {
+	sim.addSubpop("p1", 1000);
+	sim.setValue("p_0_acc", rep(0, 50));
+	sim.setValue("p_acc", rep(0, 50));
+}
+
+10000:210000 late()	// 200000 generations after burn-in
+{
+	if (sim.generation % 500 != 0)
+		return;
+	
+	muts = sim.mutations;
+	freqs = sim.mutationFrequencies(NULL);
+	m1_f = freqs[muts.mutationType == m1];
+	m2_f = freqs[muts.mutationType == m2];
+	m3_f = freqs[muts.mutationType == m3];
+	
+	// Calculate p_0 from polymorphism in m1 mutations
+	p_0 = apply(0:49, "{ sum((m1_f >= applyValue / 50) & (m1_f < (applyValue + 1) / 50)); }");
+	
+	// Calculate p from polymorphism in m2+m3 mutations
+	m23_f = c(m2_f, m3_f);
+	p = apply(0:49, "{ sum((m23_f >= applyValue / 50) & (m23_f < (applyValue + 1) / 50)); }");
+	
+	// Add this generation's values in to our accumulators
+	sim.setValue("p_0_acc", sim.getValue("p_0_acc") + p_0);
+	sim.setValue("p_acc", sim.getValue("p_acc") + p);
+}
+
+210000 late()
+{
+	// Get substitution and mutation info
+	subs = sim.substitutions;
+	m1_subs = subs[subs.mutationType == m1];
+	m2_subs = subs[subs.mutationType == m2];
+	m3_subs = subs[subs.mutationType == m3];
+	
+	// Calculate d_0 and d from substitutions of m1 and m2+m3
+	d_0 = m1_subs.size();
+	d = m2_subs.size() + m3_subs.size();
+	cat("d_0: " + d_0 + "\n");
+	cat("d: " + d + "\n");
+	
+	// Emit f, the centers of our frequency bins (assumed in the code below)
+	f = ((0:49) + 0.5) / 50;
+	cat("f: " + paste(f) + "\n");
+	
+	// Emit p_0 and p
+	p_0 = sim.getValue("p_0_acc");
+	p = sim.getValue("p_acc");
+	
+	cat("p_0: " + paste(p_0) + "\n");
+	cat("p: " + paste(p) + "\n");
+	
+	// Calculate the true alpha: m3 / (m2+m3) substitutions
+	true_alpha = m3_subs.size() / (m2_subs.size() + m3_subs.size());
+	cat("True alpha: " + true_alpha + "\n");
+	
+	// Calculate the non-asymptotic MK estimate
+	MK_alpha = 1 - (d_0/d) * (sum(p)/sum(p_0));
+	cat("MK alpha: " + MK_alpha + "\n");
+	
+	// Output data in the format expected by the MK web service
+	cat("\nInput file:\nx\tp\tp0\n");
+	for (i in 0:49)
+		cat(f[i] + "\t" + p[i] + "\t" + p_0[i] + "\n");
+}
