@@ -663,7 +663,7 @@ run <- function(...)
 	out("<p style=\"margin-top: 30px;\"><b>Citation:</b></p>
 
 <p>If you use this service, please cite our paper:</p>
-<blockquote><i>[not yet published, please check back for a citation...]</i></blockquote>
+<blockquote>B.C. Haller, P.W. Messer. (2017). asymptoticMK: A web-based tool for the asymptotic McDonald&ndash;Kreitman test. <i>G3: Genes, Genomes, Genetics 7</i>(5), 1569&ndash;1575. <A HREF=\"http://dx.doi.org/10.1534/g3.117.039693\" target=\"_blank\">doi:10.1534/g3.117.039693</A></blockquote>
 
 <hr width=\"75%\" style=\"margin-top: 30px; margin-bottom: 30px;\">
 

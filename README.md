@@ -1,6 +1,8 @@
 # asymptoticMK
 A tool for computing alpha, the fraction of nucleotide substitutions in a given genomic region that were driven to fixation by positive selection.
 
+**Citation:** B.C. Haller, P.W. Messer. (2017). asymptoticMK: A web-based tool for the asymptotic McDonald–Kreitman test. *G3: Genes, Genomes, Genetics 7*(5), 1569–1575.
+
 ---------------------
 #### A web version of this software is available at [http://benhaller.com/messerlab/asymptoticMK.html](http://benhaller.com/messerlab/asymptoticMK.html).  This source repository is intended for users who wish to run asymptoticMK on their local machine, or wish to modify asymptoticMK for their own use.
 ---------------------

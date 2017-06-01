@@ -414,7 +414,7 @@ asymptoticMK <- function(d0, d, xlow, xhigh, df, true_alpha=NA, output="table", 
 		cat(paste0("95% CI(upper)\t", format(alpha_1_high, digits=5, nsmall=5, scientific=FALSE)), "\n")
 		cat(paste0("alpha_original\t", format(alpha_nonasymp, digits=5, nsmall=5, scientific=FALSE)), "\n")
 		
-		cat("\nIf you use this service, please cite our paper:\n\n   [not yet published, please check back for a citation...]\n\nPlease let us know of any issues with this service at philipp {dot} messer <at> gmail [dot] com.  Thanks!\n\n")
+		cat("\nIf you use this service, please cite our paper:\n\n   B.C. Haller, P.W. Messer. (2017). asymptoticMK: A web-based tool\n      for the asymptotic McDonald-Kreitman test. G3: Genes, Genomes,\n      Genetics 7(5), 1569-1575. doi:10.1534/g3.117.039693\n\nPlease let us know of any issues with this service at philipp {dot} messer <at> gmail [dot] com.  Thanks!\n\n")
 		
 		
 		#	Output plots
